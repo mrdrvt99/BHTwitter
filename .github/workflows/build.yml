@@ -94,18 +94,24 @@ jobs:
       - name: Download iOS SDK
         if: steps.SDK.outputs.cache-hit != 'true'
         run: |
-          git clone -n --depth=1 --filter=tree:0 --quiet https://github.com/Tonwalter888/iOS-SDKs.git sdks-temp
+          # Clone from the recommended repo (has full private symbols patched)
+          git clone -n --depth=1 --filter=tree:0 --quiet https://github.com/xybp888/iOS-SDKs.git sdks-temp
           cd sdks-temp
+          # Set sparse-checkout mode properly
           git sparse-checkout init --no-cone
+          # Pull only the exact 18.6 SDK folder
           git sparse-checkout set iPhoneOS${{ inputs.sdk_version }}.sdk
           git checkout
+          # Debug: show what's there (remove after testing if you want)
+          ls -la
+          # Move to Theos sdks dir
           mkdir -p "${THEOS}/sdks"
-          mv iPhoneOS*.sdk "${THEOS}/sdks/" || true
+          mv iPhoneOS*.sdk "${THEOS}/sdks/" || true   # won't fail if no match (rare)
           cd ..
-          rm -rf sdks-temp
+          rm -rf sdks-temp   # cleanup
         env:
           THEOS: ${{ github.workspace }}/theos
-
+      
       - name: Get BHTwitter Version
         run: |
           BHTWITTER_VERSION=$(awk '/Version:/ {print $2}' main/control)
