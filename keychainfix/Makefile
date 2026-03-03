@@ -1,15 +1,17 @@
-makefileTARGET := iphone:clang:latest:14.0   # ← you can keep 14.0 as min deployment (works on old devices too)
-                                     #   or raise to 15.0 / 16.0 / 18.0 if you only care about newer iOS
+# For sideloaded: Keep deployment low for broad device compat, but SDK high for modern headers/symbols
+TARGET := iphone:clang:latest:14.0   # 14.0 is fine; bump to 15.0/16.0 if you want stricter iOS 18+ only
 
-# Add / change these lines to force using the downloaded 18.6 SDK
+# Enforce the downloaded 18.6 SDK (from xybp888 repo)
 SDKVERSION             = 18.6
 THEOS_DEVICE_SDK_VERSION = 18.6
 SDKROOT                ?= $(THEOS)/sdks/iPhoneOS18.6.sdk
 
-# Recommended for modern Theos + iOS 18 builds (arm64e is required on newer devices)
+# Critical for iOS 18+ devices (A12+ pointer auth, arm64e binaries)
 ARCHS                  = arm64 arm64e
 
-INSTALL_TARGET_PROCESSES = Twitter   # ← fine, but note: app is now called "X" — if injecting into current X app, change to X (case-sensitive)
+# Process to inject into (Twitter/X app)
+# If targeting current X app versions, change to: INSTALL_TARGET_PROCESSES = X
+INSTALL_TARGET_PROCESSES = Twitter
 
 include $(THEOS)/makefiles/common.mk
 
@@ -18,5 +20,7 @@ keychainfix_FILES = Tweak.x
 keychainfix_FRAMEWORKS = UIKit Foundation Security
 keychainfix_CFLAGS = -fobjc-arc
 
-include $(THEOS_MAKE_PATH)/tweak.mk
+# Optional: If you hit linking issues with newer clang, add these
+# keychainfix_LDFLAGS += -Wl,-rpath,@loader_path/Frameworks   # for embedded frameworks if any
 
+include $(THEOS_MAKE_PATH)/tweak.mk
