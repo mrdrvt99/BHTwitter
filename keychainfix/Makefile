@@ -1,4 +1,4 @@
-TARGET := iphone:clang:latest:15.0
+TARGET := iphone:clang:latest:16.0
 SDKVERSION = 18.6
 THEOS_DEVICE_SDK_VERSION = 18.6
 SDKROOT ?= $(THEOS)/sdks/iPhoneOS18.6.sdk
